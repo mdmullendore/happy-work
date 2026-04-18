@@ -13,7 +13,7 @@ import (
 	"time"
 
 	handler "happywork.com/api"
-	"happywork.com/internal/config"
+	"happywork.com/config"
 )
 
 func main() {

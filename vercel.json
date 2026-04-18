@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "api/webhook.go",
-      "use": "@vercel/go",
-      "config": {
-        "includeFiles": ["internal/**"]
-      }
+      "use": "@vercel/go"
     }
   ],
   "routes": [

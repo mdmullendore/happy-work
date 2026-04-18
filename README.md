@@ -134,11 +134,9 @@ happy-work/
 ├── api/
 │   └── webhook.go      # Vercel serverless entry point
 ├── cmd/server/         # local dev entry point (wraps api/webhook.go)
-├── internal/
-│   ├── config/         # env var loading & validation
-│   ├── webhook/        # Jira payload parsing & verification
-│   ├── gemini/         # Google Gemini API client
-│   └── bitbucket/      # Bitbucket REST API client
+├── config/             # env var loading & validation
+├── webhook/            # Jira payload parsing & verification
+├── gemini/             # Google Gemini API client
 ├── vercel.json         # Vercel routes & build config
 ├── Dockerfile          # optional: for local Docker testing
 ├── .env.example

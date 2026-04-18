@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"happywork.com/internal/bitbucket"
-	"happywork.com/internal/config"
-	"happywork.com/internal/gemini"
-	"happywork.com/internal/webhook"
+	"happywork.com/bitbucket"
+	"happywork.com/config"
+	"happywork.com/gemini"
+	"happywork.com/webhook"
 )
 
 // Handler is the single entry point Vercel invokes for every request to

@@ -14,9 +14,9 @@ type Config struct {
 	JiraWebhookSecret    string // optional HMAC secret to verify Jira payloads
 	JiraTriggerStatus    string // e.g. "In Progress"
 
-	// Anthropic / Claude
-	AnthropicAPIKey string
-	ClaudeModel     string
+	// Google Gemini
+	GeminiAPIKey string
+	GeminiModel  string
 
 	// Bitbucket
 	BitbucketBaseURL   string // e.g. https://api.bitbucket.org/2.0
@@ -31,8 +31,8 @@ func Load() (*Config, error) {
 		Port:               getEnv("PORT", "8080"),
 		JiraTriggerStatus:  getEnv("JIRA_TRIGGER_STATUS", "In Progress"),
 		JiraWebhookSecret:  os.Getenv("JIRA_WEBHOOK_SECRET"),
-		AnthropicAPIKey:    os.Getenv("ANTHROPIC_API_KEY"),
-		ClaudeModel:        getEnv("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
+		GeminiAPIKey:       os.Getenv("GEMINI_API_KEY"),
+		GeminiModel:        getEnv("GEMINI_MODEL", "gemini-2.0-flash"),
 		BitbucketBaseURL:   getEnv("BITBUCKET_BASE_URL", "https://api.bitbucket.org/2.0"),
 		BitbucketWorkspace: os.Getenv("BITBUCKET_WORKSPACE"),
 		BitbucketAPIKey:    os.Getenv("BITBUCKET_API_KEY"),
@@ -46,7 +46,7 @@ func Load() (*Config, error) {
 
 func (c *Config) validate() error {
 	required := map[string]string{
-		"ANTHROPIC_API_KEY":   c.AnthropicAPIKey,
+		"GEMINI_API_KEY":      c.GeminiAPIKey,
 		"BITBUCKET_WORKSPACE": c.BitbucketWorkspace,
 		"BITBUCKET_API_KEY":   c.BitbucketAPIKey,
 	}
