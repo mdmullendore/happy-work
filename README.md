@@ -72,21 +72,7 @@ curl -X POST http://localhost:8080/webhook/jira \
 
 ## Cloud deployment (AWS)
 
-### Option A – AWS App Runner (simplest)
-
-```bash
-# Build and push image to ECR
-aws ecr create-repository --repository-name happy-work
-docker build -t happy-work .
-docker tag happy-work:latest <account>.dkr.ecr.<region>.amazonaws.com/happy-work:latest
-aws ecr get-login-password | docker login --username AWS --password-stdin <account>.dkr.ecr.<region>.amazonaws.com
-docker push <account>.dkr.ecr.<region>.amazonaws.com/happy-work:latest
-
-# Create App Runner service via console or CLI
-# Set environment variables in the App Runner configuration
-```
-
-### Option B – AWS ECS Fargate
+### Option A – AWS ECS Fargate
 
 Use the provided `Dockerfile`. Set all environment variables as ECS task environment variables or (recommended) store secrets in **AWS Secrets Manager** / **Parameter Store** and inject them at runtime.
 
