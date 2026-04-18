@@ -1,17 +1,17 @@
-# happy-work
+# HAPPY WORK 🙂
 
-> A Go service that listens for Jira webhooks, uses Claude to implement the task, and opens a Bitbucket pull request automatically.
+> Happy Work 🙂 addresses the most significant bottlenecks in the Software Development Life Cycle (SDLC): context switching and boilerplate overhead. Built as Go service that listens for Jira webhooks, uses Gemini to implement the task, and opens a Bitbucket pull request automatically.
 
 ## How it works
 
 ```
-Jira issue → "In Progress"
+  Jira issue → "In Progress"
         │
         ▼
   POST /webhook/jira
         │
         ▼
-  Claude generates code changes
+  Gemini generates code changes
         │
         ▼
   Bitbucket: create branch → commit files → open PR
@@ -21,11 +21,11 @@ Jira issue → "In Progress"
 
 | Tool | Purpose |
 |------|---------|
-| Go 1.26.2 | Build the service |
+| Go 1.26+ | Build the service |
 | Docker | Container deployment |
 | Jira (Cloud or Server) | Webhook source |
 | Bitbucket Cloud | Target repo + App Password |
-| Anthropic API key | Claude access |
+| Google Gemini API key | Gemini access |
 
 ---
 
@@ -62,29 +62,52 @@ curl -X POST http://localhost:8080/webhook/jira \
 
 ---
 
-## Bitbucket App Password
+## Bitbucket API key
 
-1. Go to **Bitbucket → Personal settings → App passwords**.
-2. Create a password with scopes: `Repositories: Read & Write`, `Pull requests: Read & Write`.
-3. Set `BITBUCKET_APP_PASSWORD` to the generated value.
+1. Go to **Bitbucket → Repository settings → Access tokens** (for a repo-scoped token) or **Workspace settings → Access tokens** (for workspace-wide access).
+2. Click **Create access token**, give it a name, and select scopes: `Repositories: Read & Write` and `Pull requests: Read & Write`.
+3. Copy the generated token and set it as `BITBUCKET_API_KEY`.
 
 ---
 
-## Cloud deployment (AWS)
+## Cloud deployment (Vercel)
 
-### Option A – AWS ECS Fargate
+happy-work runs as a **Vercel serverless function** — no server to manage.
 
-Use the provided `Dockerfile`. Set all environment variables as ECS task environment variables or (recommended) store secrets in **AWS Secrets Manager** / **Parameter Store** and inject them at runtime.
-
-### Option C – GCP Cloud Run
+### 1. Install Vercel CLI & deploy
 
 ```bash
-gcloud run deploy happy-work \
-  --image gcr.io/<project>/happy-work:latest \
-  --platform managed \
-  --region us-central1 \
-  --set-env-vars ANTHROPIC_API_KEY=...,BITBUCKET_WORKSPACE=...
+npm i -g vercel
+vercel login
+
+# From the project root:
+vercel --prod
 ```
+
+Vercel detects `vercel.json`, builds `api/webhook.go` with the Go runtime, and exposes it at:
+```
+https://<your-project>.vercel.app/webhook/jira
+```
+
+### 2. Set environment variables
+
+```bash
+vercel env add GEMINI_API_KEY
+vercel env add BITBUCKET_WORKSPACE
+vercel env add BITBUCKET_USERNAME
+vercel env add BITBUCKET_API_KEY
+# Optional:
+vercel env add JIRA_WEBHOOK_SECRET
+vercel env add BITBUCKET_REPO_SLUG
+```
+
+Or set them in the Vercel dashboard under **Project → Settings → Environment Variables**.
+
+### 3. Point Jira at your function
+
+Use `https://<your-project>.vercel.app/webhook/jira` as the Jira webhook URL.
+
+> **Note on timeouts:** Vercel Hobby plan limits function execution to **10 seconds**. Since Gemini + Bitbucket operations can take longer, use the **Pro plan** (60s limit) or add a queue (e.g. Vercel KV + background job) for reliability.
 
 ---
 
@@ -95,12 +118,11 @@ gcloud run deploy happy-work \
 | `PORT` | No | `8080` | HTTP port |
 | `JIRA_TRIGGER_STATUS` | No | `In Progress` | Transition status to react to |
 | `JIRA_WEBHOOK_SECRET` | No | _(empty)_ | HMAC secret for payload verification |
-| `ANTHROPIC_API_KEY` | **Yes** | – | Anthropic API key |
-| `CLAUDE_MODEL` | No | `claude-sonnet-4-20250514` | Claude model ID |
+| `GEMINI_API_KEY` | **Yes** | – | Google Gemini API key |
+| `GEMINI_MODEL` | No | `gemini-2.0-flash` | Gemini model ID |
 | `BITBUCKET_BASE_URL` | No | `https://api.bitbucket.org/2.0` | Bitbucket API base |
 | `BITBUCKET_WORKSPACE` | **Yes** | – | Bitbucket workspace slug |
-| `BITBUCKET_USERNAME` | **Yes** | – | Bitbucket username |
-| `BITBUCKET_APP_PASSWORD` | **Yes** | – | Bitbucket app password |
+| `BITBUCKET_API_KEY` | **Yes** | – | Bitbucket repository/workspace access token |
 | `BITBUCKET_REPO_SLUG` | No | _(derived from Jira project key)_ | Override repo slug |
 
 ---
@@ -109,13 +131,16 @@ gcloud run deploy happy-work \
 
 ```
 happy-work/
-├── cmd/server/         # main entrypoint
+├── api/
+│   └── webhook.go      # Vercel serverless entry point
+├── cmd/server/         # local dev entry point (wraps api/webhook.go)
 ├── internal/
 │   ├── config/         # env var loading & validation
 │   ├── webhook/        # Jira payload parsing & verification
-│   ├── claude/         # Anthropic API client
+│   ├── gemini/         # Google Gemini API client
 │   └── bitbucket/      # Bitbucket REST API client
-├── Dockerfile
+├── vercel.json         # Vercel routes & build config
+├── Dockerfile          # optional: for local Docker testing
 ├── .env.example
 └── README.md
 ```

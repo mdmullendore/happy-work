@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/webhook.go",
+      "use": "@vercel/go"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/webhook/jira",
+      "dest": "/api/webhook.go"
+    },
+    {
+      "src": "/healthz",
+      "dest": "/api/webhook.go"
+    }
+  ],
+  "env": {
+    "JIRA_TRIGGER_STATUS": "In Progress"
+  }
+}
